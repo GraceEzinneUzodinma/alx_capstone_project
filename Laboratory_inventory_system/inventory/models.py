@@ -41,6 +41,28 @@ class Item(models.Model):
 
     def reserve_quantity(self):
         return self.monthly_consumption * self.reserve_months
+    def stock_on_hand(self):
+        total = 0
+        for batch in self.batches.all():
+            total += batch.quantity
+        return total
+
+    def reorder_quantity(self):
+        required = self.minimum_stock() + self.reserve_quantity()
+        to_order = required - self.stock_on_hand()
+        return max(to_order, 0)
+
+    def optimized_order_quantity(self):
+        if self.vendor_pack_size == 0:
+            return 0
+        packs = math.ceil(self.reorder_quantity() / self.vendor_pack_size)
+        return packs * self.vendor_pack_size
+    
+    def is_low_stock(self):
+        return self.stock_on_hand() <= self.minimum_stock()
+    def needs_reorder(self):
+        return self.reorder_quantity() > 0
+
 
     def __str__(self):
         return self.name
@@ -94,19 +116,3 @@ class StockTransaction(models.Model):
     def __str__(self):
         return f"{self.item.name} ({self.transaction_type})"
 
-    def stock_on_hand(self):
-        total = 0
-        for batch in self.batches.all():
-            total += batch.quantity
-        return total
-
-    def quantity_to_order(self):
-        required = self.minimum_stock() + self.reserve_quantity()
-        to_order = required - self.stock_on_hand()
-        return max(to_order, 0)
-
-    def optimized_order_quantity(self):
-        if self.vendor_pack_size == 0:
-            return 0
-        packs = math.ceil(self.quantity_to_order() / self.vendor_pack_size)
-        return packs * self.vendor_pack_size

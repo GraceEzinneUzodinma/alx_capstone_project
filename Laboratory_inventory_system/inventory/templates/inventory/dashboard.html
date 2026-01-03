@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventory Dashboard</title>
+</head>
+<body>
+<h2>Laboratory Inventory</h2>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Item</th>
+        <th>Stock on Hand</th>
+        <th>Monthly Usage</th>
+        <th>Minimum Stock</th>
+        <th>Reorder Qty</th>
+    </tr>
+
+    {% for item in items %}
+    <tr>
+        <td>{{ item.name }}</td>
+        <td>{{ item.stock_on_hand }}</td>
+        <td>{{ item.monthly_consumption }}</td>
+        <td>{{ item.minimum_stock }}</td>
+        <td>{{ item.reorder_quantity }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
+<td>
+  {% if item.needs_reorder %}
+      <span style="color:red;">Needs Reorder</span>
+  {% elif item.is_low_stock %}
+      <span style="color:orange;">Low Stock</span>
+  {% else %}
+      <span style="color:green;">OK</span>
+  {% endif %}
+</td>
